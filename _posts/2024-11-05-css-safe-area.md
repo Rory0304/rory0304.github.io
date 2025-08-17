@@ -4,7 +4,7 @@ description: >-
   CSS 로 웹과 웹뷰의 노치 영역을 대응하는 방법을 알아봅니다.
 author: Lois
 date: 2024-11-05 3:07 PM
-categories: [CSS, CheatSheet]
+categories: [CheatSheet, CSS]
 tags: [CSS, WebView, CheatSheet]
 pin: false
 ---
