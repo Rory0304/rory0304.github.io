@@ -1,7 +1,7 @@
 ---
 title: '[Docker] Next.js 14 Docker 적용 방법 살펴보기'
 description: >-
-  CSS 로 웹과 웹뷰의 노치 영역을 대응하는 방법을 알아봅니다.
+  Next.js 14 버전의 웹에 Docker를 세팅하는 방법
 author: Lois
 date: 2024-03-02
 categories: [Next.js, CI/CD]
