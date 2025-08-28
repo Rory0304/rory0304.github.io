@@ -91,7 +91,7 @@ pin: false
 - **기본 스레드 작업 최소화 - Minimize main-thread work**
     페이지 로드하는 동안 CPU 시간이 소요된 위치를 분석하여 표시함    
 
-    <img src="/assets/img/articles/2023-05-01-seo-lighthouse/speed-index.png" style="width: 250px">
+    <img src="/assets/img/articles/2023-05-01-seo-lighthouse/speed-index.png" style="width: 250px" alt="speed-index">
     
     - Script Evaluation
         - [스크롤 핸들러 디바운스](https://web.dev/articles/debounce-your-input-handlers?hl=ko): `requestaAnimationFrame` 콜백으로 디바운스
@@ -394,7 +394,7 @@ MUI 같은 스타일 라이브러리를 사용할 때에도 대부분 접근성 
 
 텍스트 콘텐츠 명도 대비는 4.5:1 이상, 확대 가능한 브라우저에서는 최소 3:1이라면 준수하게 여겨진다. 
 
-<img src="/assets/img/articles/2023-05-01-seo-lighthouse/color-seo.png" style="width: 250px">
+<img src="/assets/img/articles/2023-05-01-seo-lighthouse/color-seo.png" style="width: 250px" alt='color-seo'> 
 
 ---
 
@@ -436,7 +436,7 @@ canonical 은 rel 옵션을 이용하여 아래와 같이 설정할 수 있다.
 
 OG 태그는 웹페이지 url 공유시 보여주는 미리보기라 할 수 있다. 페이스북, 트위터, 네이버, 카카오톡 등 다양한 SNS 플랫폼에서 공유 시 아래와 같은 카드 형식으로 보여줄 수 있다. 
 
-<img src="/assets/img/articles/2023-05-01-seo-lighthouse/og-tag.png" style="width: 250px" />
+<img src="/assets/img/articles/2023-05-01-seo-lighthouse/og-tag.png" style="width: 250px" alt="og-tag"/>
 
 보통 아래와 같은 `property=”og:title”` 로 표현이 되지만, 트위터의 경우에는 `name=’twitter:title'` 로 표현된다
 
