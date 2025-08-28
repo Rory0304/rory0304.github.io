@@ -1,7 +1,7 @@
 ---
 title: '[트러블슈팅] 실시간 서비스에서 발생했던 FE 문제 해결 과정 정리'
 description: >-
-  Next.js 로 설계된 웹에 100명 이상의 동시접속자가 발생했을 때, 겪었던 FE 사이드 이슈를 회고합니다.
+  개발 인생 처음으로 경험했던 동시접속자 이슈 회고
 author: Lois
 date: 2025-08-17
 categories: [Next.js]

@@ -1,7 +1,7 @@
 ---
 title: '[CSS] 노치 영역 대응하기'
 description: >-
-  CSS 로 웹과 웹뷰의 노치 영역을 대응하는 방법을 알아봅니다.
+  CSS 로 웹과 웹뷰의 노치 영역을 대응하기
 author: Lois
 date: 2024-11-05 3:07 PM
 categories: [CheatSheet, CSS]

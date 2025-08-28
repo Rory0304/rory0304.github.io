@@ -1,7 +1,7 @@
 ---
 title: 'Clean Architecture 기본 개념 살펴보기'
 description: >-
-  Clean Architecture 에 대한 기본 개념 살펴봅니다.
+  너도 할 수 있어, 클린 아키텍처 
 author: Lois
 date: 2024-02-14
 categories: [Architecture]

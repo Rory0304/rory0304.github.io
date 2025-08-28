@@ -1,7 +1,7 @@
 ---
 title: '[Socket] Socket.io 첫 걸음'
 description: >-
-  실시간성 서비스를 개발하며 경험한 Socket.io의 사용 방법을 정리하고, 그 과정에서 마주친 문제들을 하나씩 해결해보았습니다.
+  말로만 듣던 Socket.io 시작하기
 author: Lois
 date: 2025-01-27T04:06:31Z
 categories: [Socket.io]

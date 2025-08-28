@@ -1,7 +1,7 @@
 ---
 title: '[Docker] Next.js 14 Docker 적용 방법 살펴보기'
 description: >-
-  Next.js 14 버전의 웹에 Docker를 세팅하는 방법
+  Docker..? 가 뭐야
 author: Lois
 date: 2024-03-02
 categories: [Next.js, CI/CD]

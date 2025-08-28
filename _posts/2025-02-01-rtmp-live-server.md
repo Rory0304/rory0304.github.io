@@ -1,11 +1,11 @@
 ---
 title: '라이브 스트리밍 프로토콜 (feat. RTMP/HLS)'
 description: >-
-  자바스크립트의 이벤트 루프 원리를 알아봅니다.
+  라이브 스트리밍 프로토콜 이론 정리
 author: Lois
 date: January 11, 2025 8:49 PM
-categories: [CheatSheet, Live Stream]
-tags: [CheatSheet, RTMP, HLS]
+categories: [Web]
+tags: [Web, RTMP, HLS]
 pin: false
 ---
 
