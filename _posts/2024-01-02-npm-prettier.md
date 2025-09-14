@@ -6,7 +6,7 @@ author: Lois
 date: 2024-01-02
 categories: [Open Source]
 tags: [Open Source, NPM]
-pin: true
+pin: false
 ---
 
 ## Intro,
@@ -346,47 +346,6 @@ import lion from "🦁"; // Looks for './eats/you.js'
 > Just as module informs the compiler about the host’s expected module format, moduleResolution, along with a few customization options, specify > the algorithm the host uses to resolve module specifiers to files 
 
 다시 Prettier 설정으로 돌아가 봅시다. 앞서 저는 target을 es2020 로 설정했지만, module resolution 을 설정해주지 않았기 때문에 module 속성 또한 es2020으로, moduleResolution은 module 값에 따라 `classic` 으로 설정이 되었습니다. `trivago`를 임포트한 모듈을 해석할 수 있으려면 `classic`이 아니라, `nodenext` 방식으로 설정해주면 됩니다. 또한, `module`의 설정값도 `nodenext` 로 변경해줍니다.
-
-### 4) 기타 정보: Editor Config + Prettier
-[EditorConfig](https://editorconfig.org/) 는 각자 다른 에디터나 IDE 를 사용해도 동일한 코딩 스타일을 유지할 수 있도록 해주는 라이브러리입니다.
-프로젝트의 root 에 .editorconfig 를 생성하여 설정이 가능한데, Prettier 와 함께 사용할 경우 이 설정들을 프리티어 고유의 Config 로 변환해줄 수 있습니다.
-
-> If `options.editorconfig` is `true` and an [`.editorconfig` file](https://editorconfig.org/) is in your project, Prettier will parse it and convert its properties to the corresponding Prettier configuration. This configuration will be overridden by `.prettierrc`, etc.
-> 
-
-만약 아래와 같이 editorconfig 파일이 설정이 되었다면,
-
-```
-// .editorconfig
-[*]
-charset = utf-8
-insert_final_newline = true
-end_of_line = lf
-indent_style = space
-indent_size = 2
-max_line_length = 80
-```
-
-Prettier 에서 일부 설정을 고유의 config 로 변환합니다. 예를 들어, end_of_line / indent_style / indent_size / max_line_length 가 해당됩니다.
-
-```
-# Stop the editor from looking for .editorconfig files in the parent directories
-# root = true
-
-[*]
-# Non-configurable Prettier behaviors 
-charset = utf-8
-insert_final_newline = true
-# Caveat: Prettier won’t trim trailing whitespace inside template strings, but your editor might.
-# trim_trailing_whitespace = true
-
-# Configurable Prettier behaviors
-# (change these if your Prettier config differs)
-end_of_line = lf
-indent_style = space
-indent_size = 2
-max_line_length = 80
-```
 
 ---
 
