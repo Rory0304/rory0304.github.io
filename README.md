@@ -1,1 +1,1 @@
-
+- Legacy Blog: https://github.com/Rory0304/legacy-rory-log
