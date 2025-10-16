@@ -1,9 +1,9 @@
 ---
-title: '[Challenge] Typescript'
+title: '[월간 챌린지] Typescript'
 description: >-
-  TypeScript 챌린지 스터디
+  TypeScript 예제 살펴보기
 author: Lois
-date: 2025-10-12
+date: 2025-10-01
 categories: [TypeScript]
 tags: [TypeScript]
 pin: false
@@ -44,9 +44,11 @@ type TupleToObject<T extends readonly (keyof any)[]> = {
   [Key in T[number]]: Key
 }
 ```
-- `keyof any`: string | number | symbol (각 원소의 타입을 얻을 수 있음)
+
+- `keyof any`: `string | number | symbol` (각 원소의 타입을 얻을 수 있음)
 - `symbol` 타입: 객체의 프로퍼티 키를 고유하게 설정함으로써 프로퍼티 키의 충돌을 방지하기 위해 사용 ([출처](https://inpa.tistory.com/entry/JS-📚-자료형-Symbol-🚩-정리))
 - `T[number]`: Indexed Access Type
+
 ```ts
 type Fruits = ['apple', 'banana', 'orange'];
 
@@ -60,12 +62,11 @@ type Fruit = Fruits[number];
 type First<T extends any[]> = T extends [infer A, ...infer rest] ? A : never
 
 ```
-첫 번째 원소 A 로 잡고, 나머지 rest 로 분해할 수 있다면 첫 번째 원소 A의 타입을 반환
+- 첫 번째 원소 A 로 잡고, 나머지 rest 로 분해할 수 있다면 첫 번째 원소 A의 타입을 반환
 - `infer`: 제네릭 타입에서 특정 타입을 추론할 수 있게 해주는 키워드로, 조건부에서 사용함
 
 ### 5. 배열을 받아 길이를 반환
 ```ts
 type Length<T extends readonly any[]> = T['length']
 ```
-T 타입의 length 프로퍼티 타입을 추출
-*배열과 튜플의 차이: 
+- T 타입의 length 프로퍼티 타입을 추출
