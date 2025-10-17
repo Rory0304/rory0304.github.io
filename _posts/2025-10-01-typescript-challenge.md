@@ -70,3 +70,31 @@ type First<T extends any[]> = T extends [infer A, ...infer rest] ? A : never
 type Length<T extends readonly any[]> = T['length']
 ```
 - T 타입의 length 프로퍼티 타입을 추출
+
+### 5. Exclude 구현하기
+```ts
+type MyExclude<T, U> = T extends U ? never : T
+```
+- 제네릭 타입을 대상으로 한 조건부 타입을 구현해야 함. 입력이 유니온 타입이라면 각 구성원에 대해 개별적으로 적용
+```ts
+type Box<T> = T extends number ? 'num' : 'other'
+
+type x = Box<1> // 'num'
+type y = Box<'1'> // 'other'
+type z = Box<1 | '1'> // 'num' | 'other'
+```
+
+### 6. 타입에 감싸인 타입이 있을 때, 안에 감싸인 타입을 구하기
+```ts
+type MyAwaited<T extends PromiseLike<any>> = T extends PromiseLike<infer U>
+  ? U extends PromiseLike<any>
+    ? MyAwaited<U>
+    : U
+  : never;
+```
+- `infer` 을 이용하여 조건부 체크후 재귀로 실행하기
+- `Like`: 넓은 의미의 타입 적용을 지원하는 타입으로, ArrayLike, PromiseLike 등이 있음
+Promise 개념이 등장했을 때는 then 만 지원하는 라이브러리가 많았고, 이후 catch, finally 가 정식 문법으로 추가되어 Promise 타입은 문법에 맞추어 then, catch, fianlly를 모두 지원하는 타입이 되었고
+PromiseLike 는 과거의 라이르러리 호환성에 맞춰 then 만 지원하는 타입도 포함할 수 있도록 확장함
+
+
