@@ -108,10 +108,8 @@ type Includes<T extends readonly any[], U> = T extends [infer First, ...infer Re
 
 ### 8. `Parameters<T>` 구현하기
 ```ts
-type MyParameters<T extends (...args: any[]) => any> =S는 매개변수 타입들의 튜플/배열
-
+type MyParameters<T extends (...args: any[]) => any> = T extends (...any: infer S) => any ? S : any 
 ```
 - `infer S`: 함수의 매개변수를 S로 추론
 - `(...any: infer S)`: 매개변수 이름은 무시하고, 타입만 추론함. 이때 S 는 매개변수 타입들의 튜플/배열임
-
 
