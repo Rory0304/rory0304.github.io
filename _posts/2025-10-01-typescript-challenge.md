@@ -9,7 +9,10 @@ tags: [TypeScript]
 pin: false
 ---
 
-## Day1
+## Problem Set
+[Type Challenges](https://github.com/type-challenges)
+
+## Easy
 ### 1. Pick 구현하기
 ```ts
 type MyPick<T, K extends keyof T> =  {
@@ -93,8 +96,21 @@ type MyAwaited<T extends PromiseLike<any>> = T extends PromiseLike<infer U>
   : never;
 ```
 - `infer` 을 이용하여 조건부 체크후 재귀로 실행하기
-- `Like`: 넓은 의미의 타입 적용을 지원하는 타입으로, ArrayLike, PromiseLike 등이 있음
+- `Like`: 넓은 의미의 타입 적용을 지원하는 타입으로, ArrayLike, PromiseLike 등이 있음.
 Promise 개념이 등장했을 때는 then 만 지원하는 라이브러리가 많았고, 이후 catch, finally 가 정식 문법으로 추가되어 Promise 타입은 문법에 맞추어 then, catch, fianlly를 모두 지원하는 타입이 되었고
-PromiseLike 는 과거의 라이르러리 호환성에 맞춰 then 만 지원하는 타입도 포함할 수 있도록 확장함
+PromiseLike 는 과거의 라이르러리 호환성에 맞춰 then 만 지원하는 타입도 포함할 수 있도록 확장한 것. ArrayLike 는 배열 메서드가 없는 객체이기 때문에, rest 파라미터의 사용이 불가하다. 
+
+### 7. Includes 구현하기
+```ts
+type Includes<T extends readonly any[], U> = T extends [infer First, ...infer Rest] ? Equal<First, U> extends true ? true : Includes<Rest, U> : false
+```
+
+### 8. `Parameters<T>` 구현하기
+```ts
+type MyParameters<T extends (...args: any[]) => any> =S는 매개변수 타입들의 튜플/배열
+
+```
+- `infer S`: 함수의 매개변수를 S로 추론
+- `(...any: infer S)`: 매개변수 이름은 무시하고, 타입만 추론함. 이때 S 는 매개변수 타입들의 튜플/배열임
 
 
