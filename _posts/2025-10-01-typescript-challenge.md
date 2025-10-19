@@ -79,6 +79,7 @@ type Length<T extends readonly any[]> = T['length']
 type MyExclude<T, U> = T extends U ? never : T
 ```
 - 제네릭 타입을 대상으로 한 조건부 타입을 구현해야 함. 입력이 유니온 타입이라면 각 구성원에 대해 개별적으로 적용
+
 ```ts
 type Box<T> = T extends number ? 'num' : 'other'
 
