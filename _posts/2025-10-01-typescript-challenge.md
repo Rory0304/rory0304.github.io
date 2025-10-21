@@ -77,6 +77,8 @@ type Length<T extends readonly any[]> = T['length']
 ### 5. Exclude 구현하기
 ```ts
 type MyExclude<T, U> = T extends U ? never : T
+// MyExclude<'a' | 'b' | 'c', 'a'> // 'b' | 'c'
+
 ```
 - 제네릭 타입을 대상으로 한 조건부 타입을 구현해야 함. 입력이 유니온 타입이라면 각 구성원에 대해 개별적으로 적용
 
@@ -86,6 +88,25 @@ type Box<T> = T extends number ? 'num' : 'other'
 type x = Box<1> // 'num'
 type y = Box<'1'> // 'other'
 type z = Box<1 | '1'> // 'num' | 'other'
+```
+
+- 해설: `never` 타입은 any 타입을 포함하여 어떤 값도 가질 수 없음을 나타낸다. 때때로 '점유할 수 없는' 또는 '바닥 타입'이라고 한다. (출처: [타입스크립트의 Never 타입 완벽 가이드](https://ui.toast.com/posts/ko_20220323))
+
+
+```ts
+type A = 'a' | 'b' | 'c';
+type B = 'a' | 'd';
+
+
+type MyExclude<T, U> =  T extends U ? never : T;
+type C = MyExclude<A, B>; 
+
+/**
+type C =
+   ('a' extends 'a' | 'd'  ? never : 'a')
+  | ("b" extends 'a' | 'd'  ? never : 'b')
+  | ("c" extends 'a' | 'd'  ? never : 'c')
+**/
 ```
 
 ### 6. 타입에 감싸인 타입이 있을 때, 안에 감싸인 타입을 구하기
@@ -113,3 +134,28 @@ type MyParameters<T extends (...args: any[]) => any> = T extends (...any: infer 
 - `infer S`: 함수의 매개변수를 S로 추론
 - `(...any: infer S)`: 매개변수 이름은 무시하고, 타입만 추론함. 이때 S 는 매개변수 타입들의 튜플/배열임
 
+
+## Medium
+### 1. `ReturnType<T>` 구현하기
+```ts
+type MyReturnType<T extends Function> = T extends (...args: any) => infer R ? R : never
+```
+
+### 2. `Omit<T, K>` 구현하기
+```ts
+type MyOmit<T, K extends keyof T> = {[P in keyof T as P extends K ? never: P] :T[P]}
+```
+- Omit 과 Exclude 차이: Exclude 는 유니온 타입 T 에서 U 를 제거. Omit 은 객체 타입 T의 프로퍼티 키에서 K를 제거
+
+
+### 3. `T`에서 `K` 프로퍼티만 읽기 전용으로 설정해 새로운 오브젝트 타입 만들기
+```ts
+type MyReadonly<T> = {
+  readonly [P in keyof T]: T[P]
+}
+
+type MyOmit<T, K> = {[P in keyof T as P extends K ? never : P]: T[P]}
+
+type MyReadonly2<T, K extends keyof T = keyof T> = MyReadonly<Pick<T, K>> & MyOmit<T, K>
+```
+- `K extends keyof T = keyof T`: K는 T의 키 집합 중 일부이며, 기본값은 keyof T(모든키)
