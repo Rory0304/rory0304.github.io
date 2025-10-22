@@ -6,7 +6,7 @@ author: Lois
 date: 2025-08-17
 categories: [Next.js]
 tags: [Next.js, TroubleShooting]
-pin: true
+pin: false
 ---
 
 ## 배경
