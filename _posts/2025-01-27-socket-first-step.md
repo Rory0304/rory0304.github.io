@@ -4,8 +4,8 @@ description: >-
   말로만 듣던 Socket.io 시작하기
 author: Lois
 date: 2025-01-27T04:06:31Z
-categories: [Socket.io]
-tags: [React, Socket.io]
+categories: [Web, Socket.io]
+tags: [Web, Socket.io]
 pin: false
 ---
 
