@@ -33,7 +33,9 @@ pin: false
 
 **3) CPU나 메모리 사용수치는 그리 높지 않았는데, DB transcation 만 높았던 문제**
 
-DB transaction은 DB 상태를 변화시키기 위해 수행하는 작업의 논리적 단위로, 실제 동시접속자가 몰렸을떄 CPU나 메모리 사용량은 높지 않았는데 DB 트랜젝션이 유독 높아서 해당 수치를 줄이기 위해 백앤드와 협업하여 프론트에서 API 수를 최대한 줄여보아야 했다.
+DB transaction은 DB 상태를 변화시키기 위해 수행하는 작업의 논리적 단위로, 실제 동시접속자가 몰렸을떄 CPU나 메모리 사용량은 높지 않았는데 DB 트랜젝션이 유독 높았다.
+실질적으로 백엔드의 DB 쿼리 최적화가 필요했으나, 프론트엔드에서도 해당 수치를 조금이라도 줄이기 위해 클라이언트가 요청하는 API 최적화작업을 진행했다.
+
 
 ###  1) react query의 디폴트 옵션 처리
 react query 의 기본 옵션 중 `refetchOnWindowFocus` 가 있다. 해당 옵션은 유저가 윈도우에서 나갔다가 다시 focus 했을 때
@@ -106,7 +108,40 @@ const { isOpenProfileBottomSheet, isOpenProductOrderBottomSheet } = usePresentat
 )
 ```
 
-서버단의 DB transaction 문제를 위 방식을 취하여 해결을 시도하였고, 그 결과 초기 진입에서 사용되던 API 호출수를 15 -> 10번으로 줄일 수 있었다.
+### 3) 서버사이드 API 호출 로직 단순화
+SEO 를 위해서 서버사이드에서 API 를 호출하여 OpenGraph 정보를 구성하는 작업을 진행해주었다. 하지만, 서버사이드에서 호출하는 엔드포인트의 속도가 느린 관계로 페이지 렌더링 초기 속도 지표인LCP도 2.5s 정도 걸렸다.
+당시에는 주 고객인 셀러가 SEO를 중요시했고, 꼭 필요한 기능으로 여겼기 때문에 개선 작업은 후순위로 미뤄 진행이 되었다. 추후 안정화를 거치면서 API 호출수를 하나로 줄일 수 있는 SEO 전용 API 를 백엔드측에 제안했고, 다행히 수용해주셔서 서버사이드의 호출 로직을 개선해볼 수 있었다. LCP 측정 결과도 1.11s 가 소요되어 1.4s 정도 개선해볼 수 있었다.
+
+#### AS-IS
+```ts
+export async function generateMetadata({ params, searchParams }, parent) {
+  const streamId = params.streamId
+  const liveStreamDetail = await fetch(`/stream/detail/${streamId}`).then((res) => res.json());
+  const liveMarketId = liveStreamDetail.market.id; 
+  const liveMarketDetail = await fetch(`/market/detail/${liveMarketId}`)
+
+  return {
+    title: liveMarketDetail.title,
+    openGraph: {
+      images: [liveMarketDetail.posterImage]
+    },
+  }
+}
+```
+
+#### TO-BE
+```ts
+export async function generateMetadata({ params, searchParams }, parent) {
+  const liveMarketSEO = await fetch(`/market/seo/${streamId}`).then((res) => res.json());
+
+  return {
+    title: liveMarketSEO.title,
+    openGraph: {
+      images: [liveMarketSEO.posterImage]
+    },
+  }
+}
+```
 
 ## 문제2. 이미지 로드가 느려요
 ### 1) 원본 이미지의 용량을 줄이기 
@@ -165,7 +200,8 @@ module.exports = {
 구매 이벤트가 동시에 여러개 발생하게 되면서, 애니메이션이 그려지는 동안 앱 화면과 iOS 웹에서 유저가 누른 버튼이 제대로 실행되기까지 지연되는 문제가 발생했다.
 
 ### 원인
-당시에는 UI Blocking 문제를 예상하지 못하여, `renderChatMessage` 이라는 map 함수를 통해 애니메이션 socket 이벤트를 단순히 뿌려주고 있었다.
+당시에는 UI Blocking 문제를 예상하지 못하여, socket 이벤트가 발생하면 컴포넌트를  `renderChatMessage` 이라는 map 함수로 단순히 렌더링해주었다.
+즉, 소켓 이벤트가 100번 동작하면 채팅 애니메이션 컴포넌트도 100번 렌더링된다.
 
 ```tsx
 // Fade out 을 위한 메세지 제거
@@ -192,27 +228,28 @@ return(
 )
 ```
 
-여기서 나는 JS 가 싱글스레드로 동작한다는 것을 잊지 말았어야 했다...싱글 스레드 특성 상, 콜스택이 높은 빈도로 점유를 하고 있다면 다른 작업을 처리하기 까지 딜레이가 발생하기 때문이다. UI Blocking 이 생기는 이유도, 콜스택이 비워지지 않으면 대기중인 UI 액션들도 콜스택으로 갈 수가 없기 때문에 실제로 이벤트가 발생하여도 뷰에 보여지기까지 지연 현상이 발생하게 된다. 또한 Timer 를 제대로 cleanup 하지 않으면 모바일 기기에서 메모리 점유가 발생하여 앱이 간혹 크래시되는 문제도 있었다. 
+UI Blocking 이 발생하는 원인은 JS 싱글 스레드 특성 상, 콜스택이 높은 빈도로 점유를 하고 있다면 다른 작업을 처리하기 까지 딜레이가 발생하기 때문이다. 콜스택이 비워지지 않으면 대기중인 UI 액션이 콜스택으로 갈 수가 없기 때문에 실제로 이벤트가 발생하여도 뷰에 보여지기까지 지연 현상이 발생하게 된다. 또한 Timer 를 제대로 cleanup 하지 않으면 모바일 기기에서 메모리 점유가 발생하여 앱이 간혹 크래시되는 문제도 있었다. 
 
 ### 해결
-구매 이벤트 애니메이션의 경우 1회성 이벤트이며 히스토리가 남지 않는 심미성을 위한 UI 이다. 따라, 애니메이션의 경우 구매 이벤트가 100번 이상 동시 발생하였을 때 100개의 이벤트를 모두 순차적으로 렌더링하는 것이 아니라, 최대 20개의 최신 이벤트를 큐에서 다루고, 이를 5개씩 순차적으로 애니메이션을 보여줄 수 있도록 타협을 하였다.
+우선 100번의 이벤트가 발생하면 100번 모두 UI 를 보여주어야 하는지 고민했다. 구매 이벤트 애니메이션의 경우 1회성 이벤트이며 히스토리가 남지 않는 심미성을 위한 UI 이다. 정합성이 필요하지 않다면 실질적인 렌더링 횟수를 줄이는 것이 좋을 것 같았다. 따라서,최대 20개의 최신 이벤트를 큐에서 다루고, 이를 5개씩 순차적으로 애니메이션을 보여줄 수 있도록 타협을 하였다. 그리고 콜스택이 점유하지 않도록 setTimeout 배치로 처리하여 비동기작업으로 실행하고, 이를 태스크큐에서 처리하도록 하여 콜스택에 여유를 줄 수 있도록 했다.
+테스트로 1000개의 메세지가 200ms 로 렌더링되었을때 유저 터치가 무시되는 현상은 개선되었다. 
 
 1. 메시지 큐: 최신 메시지들을 큐에 저장하며 최대 maxsize 가 20으로 한정한다.
 - 만약 socket 으로부터 들어온 이벤트 메세지가 maxSize 를 초과한다면, 최신 20개의 메세지만 남기고 이전의 메세지는 삭제한다.
 - max 20을 지정한 이유: 히스토리가 유지되어야 하는 채팅 메세지면 모르겠으나, 오로지 심미성을 위한 애니메이션 컴포넌트라면 예측 가능한 메모리를 지정하여 메모리 누수를 방지하는 것이 좋을 것이라 생각했다.
 
 2. 디스플레이 큐: 메세지 큐에 데이터가 있을 때마다 5개씩 렌더링한다.
-- 배치 처리: 메시지 큐에서 최신 메세지 중 최대 5개의 메시지만 먼저 화면에 표시하고, 남은 메세지가 있다면 interval로 배치 처리한다.
+- 배치 처리: 메시지 큐에서 최신 메세지 중 최대 5개의 메시지만 먼저 화면에 표시하고, 남은 메세지가 있다면 timeout으로 배치 처리한다.
 - 메세지는 1.5초 정도 보여주고, 자동으로 fade out 되어 제거된다.
 - max 5를 지정한 이유: 메세지가 동시에 fade-in / fade-out 이 보여졌을 때 사용자가 읽기 편해야하기 때문에, display 의 최대 수에도 제한을 두었다.
 
-3. CleanUp: 타이머 정리를 하여 메모리 누수 방지한다.
+3. CleanUp: 위에 해당하는 타이머 정리를 하여 메모리 누수 방지한다.
 
 ## 문제4. 채팅 메세지 전송이 되지 않아요
 문제의 발단은 서버 부하로 채팅 API 및 소켓 응답이 제대로 되지 않았던 문제였다. 현재 백엔드 구조 상, 일반 API 스펙과 채팅 API 스펙이 같은 DB 에서 사용되고 있었는데,
-사용자가 늘어남에 DB 부하를 줄이기 위해 로드 밸런서와 분산 DB로 작업을 진행해주어야 했고, 이를 Redis 를 적용해주는 작업이 진행되었다.
+사용자가 늘어남에 DB 부하를 줄이기 위해 로드 밸런서를 적용하고, 채팅 DB를 Redis 로 옮기는 작업이 진행되었다.
 
-이상하게도, Redis 로 마이그레이션 시점 이후, 채팅 연결 시도 시 `Socket transport error` 가 지속하여 발생하였다. 해당 오류가 특히 websocket 으로 upgrade 되는 과정에서 발생한 transport 정책과 관련된 문제라, 확인해봤을 때 FE/BE 둘다 polling -> websocket 으로 동일하게 설정되어 있어서 해결책을 찾는데 시간이 걸렸다.
+Redis 로 마이그레이션 시점 이후, 채팅 연결 시도 시 `Socket transport error` 가 지속하여 발생하였다. 해당 오류가 특히 websocket 으로 upgrade 되는 과정에서 발생한 transport 정책과 관련된 문제라, 확인해봤을 때 FE/BE 둘다 polling -> websocket 으로 동일하게 설정되어 있어서 해결책을 찾는데 시간이 걸렸다.
 
 본래라면 polling 첫 시도로 인해 Long polling HTTP 로 요청을 보내고 그에 따라 응답을 받아야 하는데, 각 요청이 독립적이고 상태를 유지하지 않는 특성으로 인해 접속되는 Worker 가 계속 변하면서 요청들이 각각 다른 서버로 라우팅되어 발생하는 문제인듯 했다.
 
