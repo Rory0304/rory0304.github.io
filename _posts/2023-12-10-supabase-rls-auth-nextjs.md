@@ -19,7 +19,7 @@ Supabase 프로젝트를 진행하면서 로그인 과정을 구현하게 되었
 ### Securing Your Tables
 Supabase 에서는 Anon Key 를 통해 브라우저에 접근한 어떤 유저든 DB 의 데이터에 접근할 수 있도록 할 수 있다. ‘만약 anon key 를 이용한다면, 어떤 유저든 자바스크립트 코드를 읽고 키를 훔칠 수 있지 않을까? ’ 라는 의문이 생길 수 있는데, 이때 사용하는 것이 Postgres 의 RLS (Row-Level Security) 정책이다. 즉, anon key 로 접근이 가능한 데이터와 사용할 수 없게 접근을 제한해야하는 데이터를 ‘정책’을 만들어 설정할 수 있다. 예를 들어, anon key 는 누구나 Read 를 할 수는 있지만, Write / Update / Delete 를 할 수 없는 경우에 사용할 수 있다. Supabase 는 테이블마다 이런 정책으로 접근 권한을 다양하게 설정할 수 있다.
 
-![Untitled](https://prod-files-secure.s3.us-west-2.amazonaws.com/cb10c339-4940-4391-9ac9-19dcc053c913/156f4800-a2a9-4030-8091-bd9eb7059fa6/Untitled.png)
+![supabase-auth](/assets/img/articles/2023-12-10-supabase-rls-auth-nextjs/supabase-auth.png)
 
 ### Roles
 Supabase 는 postgres 에서 사전에 [정의된 role](https://www.postgresql.org/docs/current/predefined-roles.html) 값과 Supabase 만의 프로젝트 시작 시 데이터베이스를 구성하는 role 값을 확장해서 사용한다. 그 예시는 다음과 같다.
@@ -48,7 +48,7 @@ Supabase 에서는 2가지 api key 가 존재한다. (출처: [Understanding API
 ## 🧑‍🚒 TroubleShooting
 아무튼 내가 마주한 문제는 RLS 로 anon 을 허용하지 않는(특정 유저만 접근할 수 있는) 테이블에 대해서 API 를 요청해야 하는 일이 있었는데, 이를 Next.js 에서 전역으로 사용해주고 있는 supabaseClient 에 access token 을 어떻게 설정해주어야 하는지, api를 호출하는 유틸에서는 어떻게 사용해주어야 하는 문제였다.
 
-![Untitled](https://prod-files-secure.s3.us-west-2.amazonaws.com/cb10c339-4940-4391-9ac9-19dcc053c913/b8e3c496-a3cc-4b11-a8c2-fe90f7df833d/Untitled.png)
+![login flow](/assets/img/articles/2023-12-10-supabase-rls-auth-nextjs/login-flow.png)
 
 감이 잡히질 않아서, 아래의 Supabase 커뮤니티의 오픈소스 코드를 봤다. Graphql 을 사용한 예제라, 나처럼 supabase 유틸을 따로 사용한 경우는 아니지만, access token 을 어떤 식으로 세팅하면 좋을지 어느정도 참고를 해볼 수 있었다. (출처: [supabase-graphql-example](https://github.com/supabase-community/supabase-graphql-example))
 
@@ -453,22 +453,6 @@ const { data, isFetching } = useQuery(["review", uuid], async () => {
 ## 후기 (업보 청산)
 사실 옛날에 header에 access token 을 달리하여 API 를 호출해야 하는 이슈를 만난 적이 있다. 그때는 워낙 바빴고 Next.js 의 서버사이드의 개념도 너무 어려웠기 때문에 임시로 처리를 했었다. 그리고 그 프로젝트는 안타깝게도 역사 속으로 사라지고 말았다. 자책을 많이 했었던 프로젝트라 마음이 아픈데, 개발을 게속 하다보니 당시 땜빵으로 처리했던게 업보로 돌아오는 것이다.
 기술도 기술인데, 업무 중에 놓쳐버린 개념과 실수들을 복기하지 않으면 다시 마주하게 되고 또 같은 실수를 저지르고 말 것이다. 그러니, 복기해서 다음에 같은 업무를 마주해도 유연하게 해결해볼 수 있도록 노력하자.
-
----
-
-### 9/13 (Rewrite)
-클린 아키텍처를 기반으로한 API 설계 코드를 보면서, 이 방법이 더 좋을 것 같아 리팩토링을 해봤다.
-이전에는 코드 선언부에서 서버사이드, 클라이언트 사이드 객체를 생성하여 고차 함수를 통해 주입하는 과정을 거쳤다. 하지만 해당 코드의 문제점은 다음과 같다. 
-
-1) API 를 호출할때마다 Supabase 객체를 생성하여 주입하는 과정을 거쳐야 한다.
-대부분 클라이언트 사이드에서 객체를 생성하여 주입하게 되는데, 특수한 케이스(서버사이드 호출)이 아니라면 굳이 같은 코드를 반복해서 적용해줄 필요는 없다. 
-
-2) 고차 함수 방식이 직관적이지 않다.
-사실 이때까지 사내 프로젝트에서 고차함수를 사용하는 케이스는 전무했다. 오랜만에 코드를 본 나도 익숙하지 않은 함수 선언 방식이라 코드를 읽으면서 불편함을 느꼈다.
-추후 함수의 param이 늘어난다고 했을때 가독성이 떨어져 Supabase 객체 주입하는 코드를 숨기고 싶은 마음이 들 것 같았다. 
-
-따라서, 선언부에서는 Supabase 객체를 맞춰서 생성하되, 그 코드는 숨길 수 있는 방안이 필요했고 이번에 적용해보는 방법은 `클래스`를 활용한 `Repository`, `UseCase` 설계이다.
-
 
 
 
