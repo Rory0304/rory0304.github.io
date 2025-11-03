@@ -68,9 +68,34 @@ pin: false
 HLS 를 이용하여 생성된 재생 목록은 미디어 서버에서 HTTP 를 통해 클라이언트에 전송된다. 클라이언트 측에서 HLS 전용 플레이어(hls.js) 를 선택한 경우 manifest 파일을 파싱하는 과정을 거쳐서 해상도와 mp4 등의 정보를 얻고 유저의 Network Bandwidth 를 측정하여 적절한 영상 정보를 재생하게 된다.
 
 
-### HLS 영상 트러블 슈팅
-이번 프로젝트에서 프론트는 hls.js 라이브러리를 활용했고, 관련하여 여러 트러블슈팅 과정을 공유해본다. 
+## HLS 시작하기
+### 도움이 될 자료
+- [HLS 문서](https://github.com/video-dev/hls.js/blob/master/docs/API.md#getting-started)
+- [HLS Demo](https://hlsjs.video-dev.org/demo/)
 
+#### 용어 설명
+문서에서 자주 사용되는 용어는 Level, Fragment, Buffer 다.
+Level은 동일한 콘텐츠의 서로 다른 품질/비트레이트 버전을 의미한다. 각각의 레벨은 독립적인 Media playlist 를 가지고 있고 화질에 따라 레벨을 선택해서 영상 정보를 변경할 수 있다.
+Fragment 는 다른 말로 Segment 즉 앞서 설명한 미디어 세그먼트(.ts 혹은 .m4s 포맷)이다.
+HLS 플레이어는 비디오 재생에 따른 이벤트를 제공해주고 있다. 예를 들면 다음과 같다.
+
+- Hls.Events.FRAG_LOADING: Fragment 로딩 시작
+- Hls.Events.FRAG_LOADED: Fragment 로딩 완료
+- Hls.Events.FRAG_PARSED: Fragment 파싱 완료
+- Hls.Events.LEVEL_SWITCHING: Level 변경 
+- Hls.Events.LEVEL_SWITCHED: Level 변경 완료
+
+Buffer 는 현재 재생 위치보다 미리 다운로드하여 메모리에 저장해둔 비디오/오디오 데이터다. (pre-loaded segments of video and audio data)
+버퍼를 사용함으로써 우리는 네트워크 속도가 느려져도 미리 다운로드된 영상을 계속 재생할 수 있다. 우리가 흔히 아는 '버퍼링'은 네트워크 상태가 안 좋을 때 영상의 소리나 재생이 멈춰있는 현상을 의미한다. 즉 버퍼를 위한 다운로드 속도보다 재생 속도가 빠를 경우 버퍼가 고갈되어 재생이 멈추고 로딩 상태에 머물게 된다. 이 경우 버퍼링 상태인지 판단하여 로딩 UI를 보여주거나, 버퍼 사이즈를 알맞게 조절하여 최적화할 수 있다.
+```
+maxBufferLength: 30 // 30초 앞까지 미리 다운로드
+backBufferLength: 90 // 90초 이전 데이터 유지
+maxBufferSize: 60 * 1000 * 1000, // 최대 60MB까지 버퍼링
+```
+여기서 유의해야 하는 점은 buffer 의 사이즈를 너무 많이 부여하거나, 너무 적게 부여할 경우 발생하는 문제이다. 만약 maxBufferLenght 를 짧게 설정할 경우, 메모리 절약과 빠른 ABR 반응을 지원할 수 있으나 네트워크 변동에는 취약할 수 있다. 하지만 긴 값으로 설정할 경우 안정적으로 재생이 가능하고, 네트워크 변동에 강하지만 메모리의 사용이 증가할 수 있다.
+
+
+### HLS 영상 트러블 슈팅
 #### 1. 코덱 설정을 확인
 우선 가장 많이 발생한 이슈가 영상이 안 보이거나 소리가 안 들리는 이슈였다. 
 ```
@@ -79,20 +104,21 @@ A media error occurred: bufferAddCodecError
 A media error occurred: bufferIncompatibleCodecsError
 ```
 관련하여 다양한 원인이 있겠으나, 나의 경우 iOS 기기에서 송출한 영상을 안드로이드에서 시청할 경우와 특정 안드로이드 기기에서 송출했을 경우 발생했다.
-현재 미디어 서버의 인코딩 설정값은 다음과 같았다. (*FFmpeg: 코덱과 트랜스코딩을 할 수 있는 프로그램)
+현재 미디어 서버의 인코딩(*FFmpeg: 코덱과 트랜스코딩을 할 수 있는 프로그램) 설정값은 다음과 같았다.
 
 ```
+// Node Media Server 오디오 인코딩 구성
 acParam: [
-  '-b:a',
-  '128k',
-  '-ar',
-  '44100',
-  '-ac',
+  '-b:a', // 오디오 비트레이트
+  '128k', //
+  '-ar', // 샘플레이트
+  '44100', //
+  '-ac', // 오디오 채널수
   '2',
 ]
 ```
 원인은 오디오 코덱 호환성 문제로 추가적인 설정을 해주어야 했다. 오디오 AAC 코덱은 여러 프로파일이 있는데, 일부 Galaxy 기기는 특정 AAC 프로파일만 지원할 수 있다고 한다.
-또한, 송출 시 기본적인 오디오 레벨이 너무 낮아서 일부 기기에서 들리지 않을 수 있다. 
+또한, 송출 시 기본적인 오디오 레벨이 너무 낮아서 일부 기기에서 들리지 않을 수 있다. 이는 백엔드에서 오디오 코덱을 범용(aac_low)으로 설정하여 해결해주었다.
 
 #### 2. 절전 모드인지 확인
 기본적으로 iOS 절전 모드인 경우, 영상의 자동재생은 지원하지 않는다. 
@@ -130,6 +156,30 @@ if (video.canPlayType('application/vnd.apple.mpegurl')) {
     video.src = videoSrc;
 }
 ```
+
+#### 5. 오류 제어
+RTMP 송출을 바로 시작했다고 해서, HLS 플레이어가 바로 실행되지는 않는다. 2-3s delay 가 발생하며 그전까지는 송출 서버 api 호출시 오류 응답이 내려간다.
+하지만 문제는 실제로 송출 정보가 존재하지 않거나, 송출자가 실수로 송출 후 나갔다가 재시작을 했을 경우 그 짧은 간격 사이에도 오류가 발생할 수 있다.
+따라서 1) player 시작은 했는데 아직 응답이 없는 것인지 2) 실제로 존재하지 않는 URL인지 3) 송출 재시작 되기까지 오류인지 판단을 해주어야 한다.
+
+1) Player 시작은 했는데 응답이 없는 경우
+물론 Socket 이벤트로 송출 시작 이벤트를 건네주고는 있으나, 실질적으로 바로 비디오 재생은 불가하기때문에 그 전까지는 load error가 발생한다.
+따라서 송출 시작 후 delay 에 대해서는 주기적으로 비디오 정상 동작이 가능한지 확인해주어야 한다.
+이때 사용한 것이 polling 이며 5초 주기적으로 확인하고 max count 만큼 실행되었다면 polling 을 끝내는 방식으로 진행했다.
+
+2) 실제로 존재하지 않는 URL 인 경우
+HLS.js 플레이어에서 m3u8을 로드했을떄 `MANIFEST_LOAD_ERROR` 상태값을 기반으로 실제 존재하지 않는 송출 정보임을 확인할 수 있다.
+
+3) 송출자의 실수로 송출 재시작하는 경우
+만약 송출 중에, 실수로 앱을 나가게 된다면 시청자 입장에서는 시청하고 있다가 더이상 송출할 영상 정보가 없기 떄문에 오류가 발생할 수 있다.
+다만 바로 오류 UI 를 보여주기 보다는 어느정도 송출자가 다시 시작할 수 있는 delay 를 부여하는 것이 UX 적으로 좋다고 한다.
+이때는 HLS 설정값 중 `maxNumRetry` 를 활용하여 에러 발생 후 retry 시도 횟수를 조절한다.
+
+```
+// 재생 불가한 상태에서 Hls 에서는 LEVEL_LOAD_ERROR 를 제공한 후 자동으로 retry 를 진행하게 되며, retry 설정값 이내에 재생이 가능한 경우 자동 재생한다.
+`levelLoadingMaxRetry` : 3 (특정 레벨의 로딩이 실패했을 경우 최대 재시도 횟수로, retry 를 최대 3번만 진행한다는 의미)
+```
+참고 자료) [Retry on network error rather than throwing a fatal error](https://github.com/video-dev/hls.js/issues/1714#issue-323059423)
 
 
 ## Ref
