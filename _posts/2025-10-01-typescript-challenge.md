@@ -1,5 +1,5 @@
 ---
-title: '[월간 챌린지] Typescript'
+title: '[월간 챌린지] TypeScript'
 description: >-
   TypeScript 예제 살펴보기
 author: Lois
@@ -159,3 +159,42 @@ type MyOmit<T, K> = {[P in keyof T as P extends K ? never : P]: T[P]}
 type MyReadonly2<T, K extends keyof T = keyof T> = MyReadonly<Pick<T, K>> & MyOmit<T, K>
 ```
 - `K extends keyof T = keyof T`: K는 T의 키 집합 중 일부이며, 기본값은 keyof T(모든키)
+
+
+### 4. DeepReadonly
+
+1. 객체의 프로퍼티를 하나씩 읽어오기
+- My Code
+```ts
+type DeepReadonly<T> = {
+  readonly [P in keyof T]: T[P] extends () => any ? T[P] : T[P] extends Object ? DeepReadonly<T[P]> : T[P]
+}
+```
+
+- 해설
+```ts
+type DeepReadonly<T> = {
+  readonly [k in keyof T]: T[k] extends Record<any, any>
+    ? T[k] extends Function
+      ? T[k]
+      : DeepReadonly<T[k]>
+    : T[k]
+}
+```
+- () => any 부분을 `Function` 으로 치환한 것
+- Object 를 `Record<any, any>` 로 표현한 것 -> Object는 좀 더 넓은 의미에서 사용된다. 따라서 명시적으로 키-값의 쌍으로 객체 타입을 정의한다.
+
+
+### 5. Tuple to Union
+```ts
+type TupleToUnion<T extends Array<any>> = T[number]
+```
+
+### 6. Chainable Options
+```ts
+type Chainable<T = {}> = {
+  option<K extends string, V>(key: K extends keyof T ? never : K, value: V): Chainable<Omit<T, K> & Record<K, V>>,
+  get(): T
+}
+```
+- Omit 과 Record 의 조합으로 재생성하는 것까지는 유추했는데 key의 타입을 정의하는 과정이 생각하기 어려웠음
