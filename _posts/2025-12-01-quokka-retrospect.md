@@ -19,14 +19,15 @@ Github: [https://github.com/Rory0304/quokka](https://github.com/Rory0304/quokka)
 ## 배경
 ---
 나는 지난 몇 년간 웹소설에 푹 빠져있었다. 읽은 웹소설만 400권이 넘었고, 그러다보니 플랫폼 별로 웹소설 읽기 기능을 구현하는 방식에 대해 살펴보게 되었다. 그 중에서 인상적이었던 것은 R사의 인용구 공유 기능이었다. 주로 SNS 플랫폼에서 유저들이 인상깊게 여긴 문장을 공유하는 용도로 사용이 되는데, 한동안 업데이트가 되지 않은 레거시 기능인 것 같았다. 사용할 수 있는 기능도 한정적이었다. 그래서 같은 스타일의 이미지들이 SNS 플랫폼에 떠도는 것을 보며 조금 더 다채롭게 만들어보고 싶다는 생각을 해본 것 같다.
-주기능은 **인용구를 꾸밀 수 있는 에디터**, 서브 기능은 **인용구를 공유할 수 있는 피드** 기능으로 잡고 한 달간 개발을 해보기로 했다.
+
+주기능은 **인용구를 다양하게 꾸밀 수 있는 에디터**, 서브 기능은 **인용구를 공유할 수 있는 피드** 기능으로 잡고 한 달간 개발을 해보기로 했다.
 
 ## 시작하기 전
 ---
 사이드 프로젝트를 진행하면서 스스로에게 상기하고 싶었던 점은, 목적에 부합하는 결과물에 너무 치중한 나머지 과정에서의 즐거움을 놓치고 싶지 않다는 것이다. 특히 실무에서는 결과를 보여주는 것이 중요했다면, 사이드 프로젝트는 결과물을 넘어 **내가 무엇을 배우고, 어떤 능력을 기르고 싶었는지 스스로 알 수 있어야 한다**고 생각했다. 이번에 프로젝트를 진행하면서 배워보고 싶었던 점은 다음과 같다.
 
 1) 개발 과정의 즐거움을 얻기
-> 부차적으로 나는 왜 개발자가 되고 싶어했는지 생각해보기
+> 개발을 오래 하고 싶다면 성공/실패의 결과에 집중하는 것이 아니라 과정에서 배울 수 있어야 한다.
 
 2) 내가 구현하고 싶은 기능을 만들어보기
 > 실무에서는 기획을 잘 구현하는 것이 목적이라면, 사이드프로젝트는 나의 욕망(?)이 잠뜩 담긴 기능을 구현할 수 있다!
@@ -34,10 +35,7 @@ Github: [https://github.com/Rory0304/quokka](https://github.com/Rory0304/quokka)
 3) 조금이라도 합리적인 정답에 가까워질 수 있도록 개발해보기
 > 스타트업에서 일하면서 빠르게 버그를 해결하는데 치중하다보니, 정말 최적의 정답은 무엇일지 고민하는 시간이 부족했다. 이번 사이드프로젝트로 고민하는 법을 숙련해보고 싶다.
 
-4) React 상태를 잘 관리할 수 있도록 노력해보기
-> 이건 프론트엔드 개발자의 숙명이자, 아직도 어려운 부분이다. 많이 연습하는 것이 답일 것 같다.
-
-5) AI 와 함께 개발하되, 어떻게 잘 사용할 수 있을지 고민하기
+4) AI 와 함께 개발하되, 어떻게 잘 사용할 수 있을지 고민하기
 > 나는 코드를 작성하는 행위 자체를 좋아하지만 AI 와 함께 사용했을때 그 즐거움이 반감이 되는 경우가 있었다. 피할 수 없다면 조금 더 잘 사용할 수 있는 환경을 구축해보고 싶었다.
 
 
@@ -45,14 +43,13 @@ Github: [https://github.com/Rory0304/quokka](https://github.com/Rory0304/quokka)
 ---
 우선 기본적으로 Next.js 서버 API를 활용한 풀스택 SaaS 를 만들고 싶었다. 데이터베이스는 인증/스토리지 기능을 제공하면서 무료 플랜 이용이 가능한 [Supabase](https://supabase.com/) 와 [Prisma ORM](https://www.prisma.io/) 을 선택했다. Prisma ORM 의 경우 이번에 처음 사용해보는 스택이다. 지난번 Supabase 를 활용하면서 SQL 문을 작성하거나 직접 테이블 필드를 설정하는 번거로움이 있었는데 Prisma ORM 은 타입스크립트와 호환이 좋고 안정성이 있는 쿼리를 작성한다는 역할을 부여할 수 있어서 DB/Storage/Auth 를 관리하는 Supabase 과 역할 분리가 가능하다고 생각했다. 그 밖에 서버 데이터를 패칭하고, 캐시 관리 및 동기화 로직을 조금 더 원할하게 하기 위해 [Tanstack Query](https://tanstack.com/query/latest) 를 선택했다. 스타일링으로는 [Radix UI](https://www.radix-ui.com/) + Tailwind 를 선택했는데, Radix UI 가 Tailwind 를 사용하면서도 접근성과 사용성을 고려한 Headless UI 라서 컴포넌트를 작성함에 있어 커스텀이 용이할 것으로 기대했다.
 
-## 질문 과정
+## 고민하기
 ---
-다음은 프로젝트를 진행하면서 겪은 고민 과정이다. 신입 시절에 했던 고민을 3년차 시점에 다시 복기해볼 수 있었는데, 시간이 지나 녹슬게 된 지식도 있어서 새롭게 습득한 경우도 있었다. 3년이 되어 조금 더 넓은 시야로 문제를 바라볼 수 있게 된 기회가 된 것 같다.
+다음은 프로젝트를 진행하면서 겪은 고민 과정이다. 신입 시절에 했던 고민을 3년차 시점에 다시 복기해볼 수 있었는데, 시간이 지나 녹슬게 된 지식도 있어서 새롭게 습득한 경우도 있었다. 이번 프로젝트를 진행한 덕분에 조금 더 넓은 시야로 문제를 바라볼 수 있게 된 기회가 된 것 같다.
 
 
 ### 1. 무조건 Optimistic Update 를 적용하는 것이 좋을까?
-
-#### 상황
+#### 미션
 데이터 리스트에서 개별 아이템을 삭제하는 기능을 구현하는 상황이다. 빠른 UX 를 위해 Optimistic update 를 적용하는 것이 좋을지 고민이 들었다.
 
 #### 고민해보기
@@ -61,34 +58,38 @@ Github: [https://github.com/Rory0304/quokka](https://github.com/Rory0304/quokka)
 
 | 북마크를 토글하는 UX 는 낙관적 업데이트를 적용했다.
 
-<img src="/assets/img/articles/2025-12-01-quokka-retrospect/toggle_bookmark.gif" alt="bookmark_toggle" style="width: 50%" />
+<img src="/assets/img/articles/2025-12-01-quokka-retrospect/toggle_bookmark.gif" alt="bookmark_toggle" style="width: 50%;margin:auto;" />
 
 | 데이터를 삭제하는 UX 는 빠른 반응성보다 정확성을 요하는 UX 이기 때문에 Dialog 단계를 추가헀다.
 
-<img src="/assets/img/articles/2025-12-01-quokka-retrospect/dialog.png" alt="delete_dialog" style="width: 80%" />
+<img src="/assets/img/articles/2025-12-01-quokka-retrospect/dialog.png" alt="delete_dialog" style="width: 80%;margin:auto;" />
 
 
-### 2. 로직을 무조건 합치기보다는 각 역할에 맞게 다시 분리가 가능한지 살펴본다.
-#### 상황
-1. `useEditorAction` 훅에서 Editor 의 CU mutation 작업과 함께 사용하는 이미지 업로드 mutation을 관리한다. 
-2. [1] 이미지 업로드 -> [2] Editor Update 를 진행하는 로직에서 try-catch 를 적용하여 `isLoading` state 를 정의해야 한다. 
-3. `useEditorAction` 에서는 Editor 에서 사용되는 모든 액션 로직을 정의하고 있기 때문에 코드를 읽을때  `isLoading` state 가 무엇을 관리하는지 알기 어렵다. 또한 `isEditorUpdateLoading` 으로 네이밍을 정의한다고 해도 Update 로직뿐만 아니라 Create, Image Upload 로직까지 훑어야 하는 문제가 있다.
+### 2. 로직을 무조건 합치기보다는 각 역할에 맞게 분리가 가능한지 살펴본다.
+#### 미션
+1. `useEditorAction` 훅에서 데이터 Create, Update 로직과 함께 사용되는 이미지 업로드 mutation을 관리한다.
+2.  Update 를 진행하는 로직에서 try-catch 를 적용하여 `isLoading` state 를 정의해야 한다. 
+<img src="/assets/img/articles/2025-12-01-quokka-retrospect/useEditorAction.ts.png" alt="useEditorAction" style="width: 60%; margin:auto;" />
+
+현재 문제점은 `useEditorAction` 에서는 관련된 모든 액션 로직을 정의하고 있기 때문에 코드를 읽을때 `isLoading` state 가 무엇을 관리하는지 알기 어렵다. 
+또한 `isEditorUpdateLoading` 으로 네이밍을 정의한다고 해도 Update 로직뿐만 아니라 Create, Image Upload 로직까지 훑어야 하는 문제가 있다.
 
 #### 고민해보기
 먼저 훅이 담당하는 책임이 무제한적으로 늘어날 가능성이 있는지 살펴봐야 한다. 만약 useEditorAction 훅에서 CU 뿐만 아니라 RD 까지 다루게 된다면?
-더불어 각각의 메소드에 대해 state 를 정의해야 한다면? 훅이 담당하는 역할이 비즈니스 로직이 추가됨에 따라 늘어나게 될 것이다. 하나의 기능이 담당하는 영역이 넓고, 구현이 길어질 수록 어떤 역할을 하는지 파악이 힘들어진다. 좋은 성능을 위해서는 특정한 상태 값이 업데이트되었을 때 최소한의 부분이 리렌더링 될 수 있도록 설계한다.
-
-**AS-IS**
-
-useEditorAction 의 훅에서 Create/Update/Image Upload 를 모두 관리한다.
+더불어 각각의 메소드에 대해 state 를 정의해야 한다면? 훅이 담당하는 역할이 비즈니스 로직이 추가됨에 따라 늘어나게 될 것이다. 하나의 기능이 담당하는 영역이 넓고, 구현이 길어질 수록 어떤 역할을 하는지 파악이 힘들어진다. 좋은 성능을 위해서는 특정한 상태 값이 업데이트되었을 때 최소한의 부분이 리렌더링 될 수 있도록 설계해야 한다. 
 
 **TO-BE**
 
-useEditorAction 의 훅에서 Create/Update/Image Upload 를 각각 분리한다.
-- useEditorUpdate.ts
-- useEditorCreate.ts
-- useImageUpload.ts
+- [가독성](https://frontend-fundamentals.com/code-quality/code/examples/submit-button.html)의 관점: 같이 실행되지 않는 코드를 분리하고 로직의 종류에 따라 합쳐진 함수를 쪼갠다.
+- [결합도](https://frontend-fundamentals.com/code-quality/code/examples/use-page-state-coupling.html)의 관점: 책임을 하나씩 분리하기
 
+기존 useEditorAction 의 훅에서 Create/Update/Image Upload 를 책임에 따라 각각 분리한다. 이미지를 업로드하는 용도의 훅을 따로 분리하여 Create, Update 에서 임포트하여 사용할 수 있도록 한다. 또한 isLoading 과 같이 같이 실행되지 않는 코드는 따로 분리하여 실행될 수 있도록 한다.
+
+- useImageUpload.ts: 이미지 업로드를 관리하는 훅
+- useEditorCreate.ts: 에디터의 생성 액션을 관리하는 훅
+- useEditorUpdate.ts: 에디터의 업데이트 액션을 관리하는 훅 < isLoading state 는 여기서 다룬다.
+
+<img src="/assets/img/articles/2025-12-01-quokka-retrospect/hooks.png" alt="hooks" style="width: 60%; margin:auto;" />
 
 
 ### 3. Context API 와 zustand 를 한 번에 다루는 상황에서 좋은 디렉터리 구조는 무엇일까?
@@ -126,7 +127,7 @@ _count: { select: { bookmarks: { where: { userId } } } } // postId 에 해당하
 앞서 보았듯, Prisma 에서는 include + select 옵션을 통해 쿼리 응답에 join 되는 테이블의 일부 필드를 보여줄 수 있다. 하지만 실제로 prisma 는 JOIN 이 아니라 Select 쿼리를 2번 보낸다. 즉 실제 JOIN 동작은 존재하지 않지만 JOIN 처럼 보이도록 하는 작업을 할 수 있는 것이다.
 
 따라서 Prisma 는 JOIN 의 부재로 성능 이슈가 존재한다. 크리티컬한 쿼리에 한하여 JOIN 을 RAW Query(SQL) 로 작성할 수 있도록 지원은 하고 있다.
-그런데 왜 JOIN 이 없는 것일까? [출처](https://skkuding.dev/post/prisma-join/) 글에 따라 요약하면 다음과 같다. 
+그런데 왜 JOIN 이 없는 것일까? [출처](https://skkuding.dev/post/prisma-join/)에 따라 요약하면 다음과 같다. 
 
 - Prisma 의 궁극적인 목표는 좋은 ORM 이 아니다.
 - Prisma 는 여러 데이터베이스가 동시에 사용되는 개발 환경을 상정하고 만들어졌다.
@@ -152,34 +153,9 @@ zustand 를 사용하지 않은 이유는 Editor 페이지에 한정되어 사�
 아주 기초적인 질문이지만, 조금 더 내 생각을 명확하게 하고 싶어서 글로 작성해본다.
 예를 들어, 2개 이상의 엔드포인트를 사용하는 상황에서 각 선언마다 try-catch 로 오류를 처리해야 할까? 아래의 예시를 살펴보자.
 main 을 호출할 경우, 과연 main 에서 오류가 잡힐까?
-```ts
-const asyncfunc1 = async() => {
-  try {
-    const result = await ( ... )
-    return result
-	} catch (error){
-    console.error(error)
-	}
-}
 
-const aysncfunc2 = async() => {
-  try {
-    const result = await ( ... )
-    return result
-	} catch (error){
-    console.error(error)
-	}
-}
+<img src="/assets/img/articles/2025-12-01-quokka-retrospect/examples.png" alt="examples" style="width: 60%; margin:auto;" />
 
-const main = async () => {
-  try {
-		const response1 = await asyncfunc1();
-		const response2 = await aysncfunc2();
-	}catch(error){
-    console.error(`main ${error}`)
-	}
-}
-```
 main 에서 호출 시 asyncFunc1 에서 이미 catch 문으로 오류가 잡혔기 때문에 asyncFunc1 에서 오류 처리가 먼저 실행된다.
 asyncfunc2 도 마찬가지다. 그래서 결과적으로 main 에서는 오류가 잡히지 않는다.
 
@@ -192,19 +168,8 @@ asyncfunc이 순수한 API 호출 로직이라서 다른 컴포넌트에서도 �
 >
 > Ref) https://learn.microsoft.com/en-us/dotnet/standard/exceptions/best-practices-for-exceptions
 
-```ts
-const asyncfunc1 = async() => {}
-const aysncfunc2 = async() => {}
+<img src="/assets/img/articles/2025-12-01-quokka-retrospect/example(2).png" alt="examples(2)" style="width: 60%; margin:auto;" />
 
-const main = async () => {
-  try {
-    const response1 = await asyncfunc1();
-		const response2 = await aysncfunc2(); 
-	}catch(error){
-    console.log(`${error}`)
-	}
-}
-```
 
 ### 7. 비동기를 조금 더 우아하게 다루는 방법
 잠시 [토스의 세미나 영상](https://toss.im/slash-21/sessions/3-1)을 보자. 내가 여기서 배운점을 요약하면 다음과 같다.
@@ -356,10 +321,10 @@ export default function SSRSafeSuspense(
 
 - 순수 텍스트의 내용이 보여져야 함
 - 특수 문자의 내용이 보여져야 함
-- 공백인 상태에서 <br> 태그를 렌더링하지 않아야 함
+- 공백인 상태에서 `<br>` 태그를 렌더링하지 않아야 함
 - XSS 공격에 방지하여 sanitized 된 결과를 보여주어야 함
 
-다행히 테스트코드를 작성하는 과정에서 라이브러리 내부에서 `dangerouslysetinnerhtml` 에 대한 대비가 안 되어 있는 것을 발견했고 따로 `Dompurify` 를 이용하여 sanitize 하는 과정을 거쳤다. 테스트코드에 XSS 공격 예시로 `<img src='x' onerror='alert("공격")'>` 를 의도적으로 작성했을 때 `<img src="x">` 로 잘 필터링되는 것을 확인할 수 있었다. (굳!)
+다행히 테스트코드를 작성하는 과정에서 라이브러리 내부에서 `dangerouslysetinnerhtml` 에 대한 대비가 안 되어 있는 것을 발견했고 따로 `Dompurify` 를 이용하여 sanitize 하는 과정을 거쳤다. 테스트코드에 XSS 공격 예시로 `<img src='x' onerror='alert("공격")'>` 를 의도적으로 작성했을 때 `<img src="x">` 로 잘 필터링되는 것을 확인할 수 있었다.
 
 ### 9. AI의 사용에 대해
 IDE 로는 Cursor 를 사용하고, 자세한 질문에 대해서는 Claude 를 사용했다. 나는 객관적인 실력면에서는 아직 멀었다(;;) 는 생각이라 AI 의 자동완성 기능에 무조건 의지하면 안 될 것 같다는 생각이 들었다. 그래서 Golden Rule 에 '코드를 직접 수정하지 말고, 아이디에이션을 먼저 제안할 것' 을 규칙으로 삼았다.
@@ -377,3 +342,7 @@ IDE 로는 Cursor 를 사용하고, 자세한 질문에 대해서는 Claude 를 
 - 요청 사항이 애매하거나 완전하지 않으면 먼저 사용자에게 확인을 받고 코드 개선을 진행한다.
 - 모든 코드를 처음부터 구현하려고 하지 않는다. Stable 하고 자주 적용되는 오픈소스 라이브러리 먼저 살펴본다.
 - 유저가 수정하라는 명령을 내리기 전까지는 코드를 직접적으로 수정하지 않는다. 먼저 수도 코드같은 개선 방안을 제안한다.
+
+
+## 마무리
+
